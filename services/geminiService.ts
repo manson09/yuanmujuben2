@@ -1,9 +1,10 @@
-
 const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 const BASE_URL = import.meta.env.VITE_BASE_URL;
-const MODEL_ID = "qwen3-max";
 
-const callOpenRouter = async (prompt: string, temperature: number) => {
+const OUTLINE_MODEL = "qwen-long"; 
+const SCRIPT_MODEL = "qwen3-max";
+
+const callOpenRouter = async (prompt: string, temperature: number, modelName: string) => {
   const response = await fetch(`${BASE_URL}/chat/completions`, {
     method: "POST",
     headers: {
@@ -11,7 +12,7 @@ const callOpenRouter = async (prompt: string, temperature: number) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: MODEL_ID,
+      model: modelName, 
       messages: [{ role: "user", content: prompt }],
       temperature: temperature,
     }),
@@ -60,7 +61,7 @@ export const generateStoryOutline = async (
     请开始分析并生成。
   `;
 
-  return await callOpenRouter(prompt, 0.85);
+  return await callOpenRouter(prompt, 0.85, OUTLINE_MODEL); 
 };
 
 export const generateScriptSegment = async (
@@ -112,5 +113,5 @@ export const generateScriptSegment = async (
     输出中文纯文本脚本。
   `;
 
-  return await callOpenRouter(prompt, 0.9);
+  return await callOpenRouter(prompt, 0.9, SCRIPT_MODEL); 
 };
