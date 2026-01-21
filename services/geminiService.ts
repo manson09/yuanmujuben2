@@ -1,18 +1,24 @@
-const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
-const BASE_URL = import.meta.env.VITE_BASE_URL;
+const QWEN_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+const QWEN_URL = import.meta.env.VITE_BASE_URL;
 
-const OUTLINE_MODEL = "qwen-long"; 
-const SCRIPT_MODEL = "qwen3-max";
+const GEMINI_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const GEMINI_URL = import.meta.env.VITE_GEMINI_BASE_URL;
 
-const callOpenRouter = async (prompt: string, temperature: number, modelName: string) => {
-  const response = await fetch(`${BASE_URL}/chat/completions`, {
+const OUTLINE_MODEL = "google/gemini-3-flash-Preview"; 
+const SCRIPT_MODEL = "qwen-3-max"; 
+
+const callAI = async (prompt: string, temperature: number, config: { url: string, key: string, model: string }) => {
+  const response = await fetch(`${config.url}/chat/completions`, {
     method: "POST",
     headers: {
-      "Authorization": `Bearer ${API_KEY}`,
+      "Authorization": `Bearer ${config.key}`,
       "Content-Type": "application/json",
+      // 下面两行 OpenRouter 需要，Qwen 官网会忽略，带上没关系
+      "HTTP-Referer": window.location.origin,
+      "X-Title": "YuanMu AI Workshop",
     },
     body: JSON.stringify({
-      model: modelName, 
+      model: config.model,
       messages: [{ role: "user", content: prompt }],
       temperature: temperature,
     }),
@@ -61,7 +67,11 @@ export const generateStoryOutline = async (
     请开始分析并生成。
   `;
 
-  return await callOpenRouter(prompt, 0.85, OUTLINE_MODEL); 
+ return await callAI(prompt, 0.85, {
+    url: GEMINI_URL,
+    key: GEMINI_KEY,
+    model: OUTLINE_MODEL
+  });
 };
 
 export const generateScriptSegment = async (
@@ -135,5 +145,9 @@ export const generateScriptSegment = async (
     输出中文纯文本脚本。
   `;
 
-  return await callOpenRouter(prompt, 0.9, SCRIPT_MODEL); 
+ return await callAI(prompt, 0.95, {
+    url: QWEN_URL,
+    key: QWEN_KEY,
+    model: SCRIPT_MODEL
+  });
 };
