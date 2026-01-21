@@ -109,6 +109,28 @@ export const generateScriptSegment = async (
     2. **剧情忠诚度**：所有台词和动作逻辑必须直接基于 <ORIGINAL_SOURCE>。
     3. **去AI痕迹**：禁止使用“随着时间的推移”、“他意识到”等描述性废话。多用动词，少用副词。
     4. **物理指纹**：严格复刻 <STYLE_AND_LAYOUT> 中的所有符号特征。
+    【默认归属规则】
+   - 若动作紧接某角色台词出现，且未明确指向其他人，
+     则该动作必须直接使用该角色名作为主语，而不是代词。
+     必须实名：每一行动作描写必须直接使用角色全名。
+     错误示例： ▲ 他盯着林枫，一字一顿。
+     正确示例： ▲ 项云盯着林枫，一字一顿。
+     多角色识别：如果场景中有多个角色，必须清晰标注谁在做动作（例如：▲ 项云拔剑，林枫后退）。
+         【零秒衔接指令】：
+    - 严格分析下方的 <PREVIOUS_CONTEXT> 最后一段。
+    - 第 ${startEp} 集的第一句台词或第一个动作，必须完美承接上一集的最后一秒，严禁时间跳跃！
+
+    <PREVIOUS_CONTEXT>
+    ${contextHistory}
+    </PREVIOUS_CONTEXT>
+
+    <ORIGINAL_SOURCE>
+    ${originalText.substring(0, 8000)}
+    </ORIGINAL_SOURCE>
+
+    <STORY_OUTLINE>
+    ${outlineText}
+    </STORY_OUTLINE>
 
     输出中文纯文本脚本。
   `;
