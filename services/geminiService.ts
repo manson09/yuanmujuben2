@@ -1,20 +1,38 @@
 
-import { GoogleGenAI } from "@google/genai";
+const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+const BASE_URL = import.meta.env.VITE_BASE_URL; 
+const MODEL_ID = "google/gemini-3-flash-preview"; 
 
-/**
- * 指向性保护协议 (Directional Protection Protocol):
- * 1. 严格标签隔离：使用 XML 风格标签包裹不同性质的输入。
- * 2. 职责唯一性：明确原著是剧情的唯一来源，参考文件禁止贡献任何情节。
- */
+const callOpenRouter = async (prompt: string, temperature: number) => {
+  const response = await fetch(`${BASE_URL}/chat/completions`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${API_KEY}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": window.location.origin, 
+      "X-Title": "YuanMu AI Script Workshop", 
+    },
+    body: JSON.stringify({
+      model: MODEL_ID,
+      messages: [{ role: "user", content: prompt }],
+      temperature: temperature,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error?.message || `请求失败: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
+};
 
 export const generateStoryOutline = async (
   originalText: string,
   layoutRefText: string,
   styleRefText: string
 ) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const model = 'gemini-3-pro-preview';
-  
   const prompt = `
     你现在是一名专业的漫剧总编剧。你的任务是基于【原著小说内容】创作大纲。
     
@@ -44,16 +62,7 @@ export const generateStoryOutline = async (
     请开始分析并生成。
   `;
 
-  const response = await ai.models.generateContent({
-    model,
-    contents: prompt,
-    config: {
-      temperature: 0.85,
-      thinkingConfig: { thinkingBudget: 4000 }
-    }
-  });
-
-  return response.text;
+  return await callOpenRouter(prompt, 0.85);
 };
 
 export const generateScriptSegment = async (
@@ -65,9 +74,6 @@ export const generateScriptSegment = async (
   layoutRefText: string,
   styleRefText: string
 ) => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const model = 'gemini-3-pro-preview';
-
   const startEp = (batchIndex - 1) * 3 + 1;
   const endEp = batchIndex * 3;
   const contextHistory = previousScripts ? previousScripts.substring(previousScripts.length - 12000) : '无往期脚本';
@@ -108,15 +114,5 @@ export const generateScriptSegment = async (
     输出中文纯文本脚本。
   `;
 
-  const response = await ai.models.generateContent({
-    model,
-    contents: prompt,
-    config: {
-      temperature: 0.9,
-      topP: 0.95,
-      thinkingConfig: { thinkingBudget: 5000 }
-    }
-  });
-
-  return response.text;
+  return await callOpenRouter(prompt, 0.9);
 };
