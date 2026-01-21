@@ -1,7 +1,7 @@
 
 const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
-const BASE_URL = import.meta.env.VITE_BASE_URL; 
-const MODEL_ID = "google/gemini-3-flash-preview"; 
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+const MODEL_ID = "qwen3-max";
 
 const callOpenRouter = async (prompt: string, temperature: number) => {
   const response = await fetch(`${BASE_URL}/chat/completions`, {
@@ -9,8 +9,6 @@ const callOpenRouter = async (prompt: string, temperature: number) => {
     headers: {
       "Authorization": `Bearer ${API_KEY}`,
       "Content-Type": "application/json",
-      "HTTP-Referer": window.location.origin, 
-      "X-Title": "YuanMu AI Script Workshop", 
     },
     body: JSON.stringify({
       model: MODEL_ID,
